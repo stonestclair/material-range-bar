@@ -161,7 +161,9 @@ public class RangeBar extends View {
 
     private ConnectingLine mConnectingLine;
 
-    private OnRangeBarChangeListener mListener;
+    private OnRangeBarTouchListener mRangeTouchListener;
+    private OnRangeBarChangeListener mRangeChangeListener;
+    private OnRangeBarReleaseListener mRangeReleaseListener;
 
     private OnRangeBarTextListener mPinTextListener;
 
@@ -394,8 +396,8 @@ public class RangeBar extends View {
 
         // Call the listener.
         if (newLeftIndex != mLeftIndex || newRightIndex != mRightIndex) {
-            if (mListener != null) {
-                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+            if (mRangeChangeListener != null) {
+                mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                         getPinValue(mLeftIndex),
                         getPinValue(mRightIndex));
             }
@@ -445,11 +447,19 @@ public class RangeBar extends View {
                 mLastX = event.getX();
                 mLastY = event.getY();
                 onActionDown(event.getX(), event.getY());
+
+                mRangeTouchListener.onRangeTouchListener(this, mLeftIndex, mRightIndex,
+                        getPinValue(mLeftIndex),
+                        getPinValue(mRightIndex));
                 return true;
 
             case MotionEvent.ACTION_UP:
                 this.getParent().requestDisallowInterceptTouchEvent(false);
                 onActionUp(event.getX(), event.getY());
+
+                mRangeReleaseListener.onRangeReleaseListener(this, mLeftIndex, mRightIndex,
+                        getPinValue(mLeftIndex),
+                        getPinValue(mRightIndex));
                 return true;
 
             case MotionEvent.ACTION_CANCEL:
@@ -484,14 +494,34 @@ public class RangeBar extends View {
     // Public Methods //////////////////////////////////////////////////////////
 
     /**
-     * Sets a listener to receive notifications of changes to the RangeBar. This
-     * will overwrite any existing set listeners.
+     * Sets a listener to receive a notification of the initial press to the RangeBar. This
+     * will overwrite any existing touch listener.
      *
-     * @param listener the RangeBar notification listener; null to remove any
+     * @param listener the RangeBar touch notification listener; null to remove any
+     *                 existing listener
+     */
+    public void setOnRangeBarTouchListener(OnRangeBarTouchListener listener) { mRangeTouchListener = listener; }
+
+    /**
+     * Sets a listener to receive notifications of changes to the RangeBar. This
+     * will overwrite any existing set listener.
+     *
+     * @param listener the RangeBar change notification listener; null to remove any
      *                 existing listener
      */
     public void setOnRangeBarChangeListener(OnRangeBarChangeListener listener) {
-        mListener = listener;
+        mRangeChangeListener = listener;
+    }
+
+    /**
+     * Sets a listener to receive a notification of the touch-release to the RangeBar. This
+     * will overwrite any existing set listener.
+     *
+     * @param listener the RangeBar touch-release notification listener; null to remove any
+     *                 existing listener
+     */
+    public void setOnRangeBarReleaseListener(OnRangeBarReleaseListener listener) {
+        mRangeReleaseListener = listener;
     }
 
     /**
@@ -538,8 +568,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex),
                             getPinValue(mRightIndex));
                 }
@@ -548,8 +578,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex),
                             getPinValue(mRightIndex));
                 }
@@ -580,8 +610,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex), getPinValue(mRightIndex));
                 }
             }
@@ -589,8 +619,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex), getPinValue(mRightIndex));
                 }
             }
@@ -620,8 +650,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex), getPinValue(mRightIndex));
                 }
             }
@@ -629,8 +659,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex), getPinValue(mRightIndex));
                 }
             }
@@ -865,8 +895,8 @@ public class RangeBar extends View {
             mRightIndex = rightPinIndex;
             createPins();
 
-            if (mListener != null) {
-                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+            if (mRangeChangeListener != null) {
+                mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                         getPinValue(mLeftIndex), getPinValue(mRightIndex));
             }
         }
@@ -902,8 +932,8 @@ public class RangeBar extends View {
             mRightIndex = pinIndex;
             createPins();
 
-            if (mListener != null) {
-                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+            if (mRangeChangeListener != null) {
+                mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                         getPinValue(mLeftIndex), getPinValue(mRightIndex));
             }
         }
@@ -938,8 +968,8 @@ public class RangeBar extends View {
             mRightIndex = (int) ((rightPinValue - mTickStart) / mTickInterval);
             createPins();
 
-            if (mListener != null) {
-                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+            if (mRangeChangeListener != null) {
+                mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                         getPinValue(mLeftIndex), getPinValue(mRightIndex));
             }
         }
@@ -972,8 +1002,8 @@ public class RangeBar extends View {
             mRightIndex = (int) ((pinValue - mTickStart) / mTickInterval);
             createPins();
 
-            if (mListener != null) {
-                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+            if (mRangeChangeListener != null) {
+                mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                         getPinValue(mLeftIndex), getPinValue(mRightIndex));
             }
         }
@@ -1097,8 +1127,8 @@ public class RangeBar extends View {
                 mLeftIndex = 0;
                 mRightIndex = mTickCount - 1;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex),
                             getPinValue(mRightIndex));
                 }
@@ -1366,7 +1396,8 @@ public class RangeBar extends View {
 
             releasePin(mRightThumb);
 
-        } else {
+        } 
+        /*else {
             float leftThumbXDistance = getLeftThumbXDistance(x);
             float rightThumbXDistance = getRightThumbXDistance(x);
             //move if is rangeBar and left index is lower of right one
@@ -1388,13 +1419,13 @@ public class RangeBar extends View {
                 mLeftIndex = newLeftIndex;
                 mRightIndex = newRightIndex;
 
-                if (mListener != null) {
-                    mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+                if (mRangeChangeListener != null) {
+                    mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                             getPinValue(mLeftIndex),
                             getPinValue(mRightIndex));
                 }
             }
-        }
+        }*/
     }
 
     /**
@@ -1443,8 +1474,8 @@ public class RangeBar extends View {
             }
             mRightThumb.setXValue(getPinValue(mRightIndex));
 
-            if (mListener != null) {
-                mListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
+            if (mRangeChangeListener != null) {
+                mRangeChangeListener.onRangeChangeListener(this, mLeftIndex, mRightIndex,
                         getPinValue(mLeftIndex),
                         getPinValue(mRightIndex));
             }
@@ -1555,15 +1586,19 @@ public class RangeBar extends View {
 
     // Inner Classes ///////////////////////////////////////////////////////////
 
-    /**
-     * A callback that notifies clients when the RangeBar has changed. The
-     * listener will only be called when either thumb's index has changed - not
-     * for every movement of the thumb.
-     */
-    public interface OnRangeBarChangeListener {
+    public interface OnRangeBarTouchListener{
+        void onRangeTouchListener(RangeBar rangeBar, int leftPinIndex,
+                                  int rightPinIndex, String leftPinValue, String rightPinValue);
+    }
 
+    public interface OnRangeBarChangeListener {
         void onRangeChangeListener(RangeBar rangeBar, int leftPinIndex,
                                    int rightPinIndex, String leftPinValue, String rightPinValue);
+    }
+
+    public interface OnRangeBarReleaseListener{
+        void onRangeReleaseListener(RangeBar rangeBar, int leftPinIndex,
+                                    int rightPinIndex, String leftPinValue, String rightPinValue);
     }
 
     public interface PinTextFormatter {
